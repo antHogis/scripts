@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cp -r `ls | sed '/^LICENSE$/d;/^README.md$/d;/^export_bin$/d'` ~/bin/
+
