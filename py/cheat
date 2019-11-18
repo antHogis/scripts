@@ -14,11 +14,10 @@ def inform_invalid_sheet(message):
     exit(1)
 
 def find_next_section_index(begin_index, lines):
-    spliced = lines[begin_index:]
-
-    for line in spliced:
+    for index in range(begin_index, len(lines)):
+        line = lines[index]
         if len(line) > 0 and line[0] == '#':
-            return begin_index + spliced.index(line)
+            return index
 
     return len(lines)
 
