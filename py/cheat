@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from pathlib import Path, PurePath
-import sys, traceback
+import sys
 
 CHEATSHEETS_DIR = PurePath.joinpath(Path.home(), '.cheats')
 EXISTING_SHEETS = map(lambda file : str(file).split('/')[-1], \
@@ -37,7 +37,6 @@ if len(sys.argv) > 1:
 
                     sheet = '\n'.join(sheet.splitlines()[begin_index: end_index + 1])
                 except IndexError:
-                    traceback.print_exc()
                     print('Section flag provided without section argument', \
                         file=sys.stderr)
                     exit(1)
