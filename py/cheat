@@ -8,9 +8,9 @@ EXISTING_SHEETS = map(lambda file : str(file).split('/')[-1], \
     sorted(Path(CHEATSHEETS_DIR).glob('*')))
 
 def inform_invalid_sheet(message):
-    print(message, file=sys.stderr)
-    print('The following are available:', file=sys.stderr)
-    print('\n'.join(EXISTING_SHEETS), file=sys.stderr)
+    eprint(message)
+    eprint('The following are available:')
+    eprint('\n'.join(EXISTING_SHEETS))
     exit(1)
 
 def find_next_section_index(begin_index, lines):
@@ -20,6 +20,9 @@ def find_next_section_index(begin_index, lines):
             return index
 
     return len(lines)
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 if len(sys.argv) > 1:
     if sys.argv[1] in EXISTING_SHEETS:
@@ -37,11 +40,10 @@ if len(sys.argv) > 1:
 
                     sheet = '\n'.join(sheet.splitlines()[begin_index: end_index + 1])
                 except IndexError:
-                    print('Section flag provided without section argument', \
-                        file=sys.stderr)
+                    eprint('Section flag provided without section argument')
                     exit(1)
                 except ValueError:
-                    print('Section not found!', file=sys.stderr)
+                    eprint('Section not found!')
                     exit(1)
         except IndexError:
             pass
