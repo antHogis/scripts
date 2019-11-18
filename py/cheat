@@ -4,8 +4,8 @@ from pathlib import Path, PurePath
 import sys
 
 CHEATSHEETS_DIR = PurePath.joinpath(Path.home(), '.cheats')
-EXISTING_SHEETS = map(lambda file : str(file).split('/')[-1], \
-    sorted(Path(CHEATSHEETS_DIR).glob('*')))
+EXISTING_SHEETS = list(map(lambda file : str(file).split('/')[-1], \
+    sorted(Path(CHEATSHEETS_DIR).glob('*'))))
 
 def inform_invalid_sheet(message):
     eprint(message)
