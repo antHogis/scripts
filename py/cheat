@@ -36,9 +36,11 @@ if len(sys.argv) > 1:
                     begin_index = sheet_lines.index(section) + 1
                     end_index = find_next_section_index(begin_index, sheet_lines) - 1
                     
-                    if len(sheet_lines[end_index]) == 0: end_index -= 1                    
+                    for i in range(end_index, begin_index, -1):
+                        if not sheet_lines[i]: end_index -= 1
 
                     sheet = '\n'.join(sheet.splitlines()[begin_index: end_index + 1])
+                    if not sheet: sheet = 'Section {} is empty'.format(sys.argv[3])
                 except IndexError:
                     eprint('Section flag provided without section argument')
                     exit(1)
