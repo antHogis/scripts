@@ -1,0 +1,4 @@
+#!/bin/sh
+# Command line markdown viewer
+pandoc "$1" | w3m -T text/html
+
