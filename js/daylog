@@ -88,4 +88,6 @@ if (!dayData) {
 }
 const summary = getDaySummary(dayData);
 
-Object.entries(summary).forEach(([description, duration]) => console.log(description, duration));
+Object.entries(summary)
+    .sort(([,durationA], [,durationB]) => durationB - durationA)
+    .forEach(([description, duration]) => console.log(description, duration));
