@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const homedir = require('os').homedir();
+const fs = require('fs');
+
+// EXAMPLE DATA
+//
+// ---- 14.10 ----------------------------------------
+// 0915-0930 Doing stuff
+// 0930-1000 Other stuff
+// 1000-1030 Meeting
+// 1030-1045 Doing stuff
+//
+//
+// ---- 13.10 ----------------------------------------
+// 0845-0900 Doing stuff
+// 0900-1000 Meeting
+// 1000-1100 Doing stuff
+// 1100-1130 Other stuff
+//
+function parseData(data = '') {
+    const dataLines = data.split('\n').filter(line => line.match(/^\s*$/) === null)
+    const dayData = {};
+    let currentDay = null;
+
+    for (line of dataLines) {
+        if (line.match(/^-{4} \d{2}\.\d{2} -{40}$/)) {
+            currentDay = line.match(/\d{2}\.\d{2}/g)[0]
+            dayData[currentDay] = [];
+        }
+
+        if (dayData[currentDay] !== undefined && line.match(/^\d{4}-\d{4}/)) {
+            dayData[currentDay].push({
+                start: {
+                    hour: line.slice(0, 2),
+                    minute: line.slice(2, 4),
+                },
+                end: {
+                    hour: line.slice(5, 7),
+                    minute: line.slice(7, 9)
+                },
+                description: line.slice(10),
+            })
+        }
+    }
+
+    return dayData;
+}
+
+function calculateDuration(data) {
+    const start = new Date(0);
+    const end  =  new Date(0);
+    start.setHours(data.start.hour, data.start.minute);
+    end.setHours(data.end.hour, data.end.minute);
+
+    return (end - start) / 1000 / 60 / 60;
+}
+
+function getDaySummary(data, date) {
+    const uniqueDescriptions = [...new Set(data[date].map(x => x.description))]
+    const summary = {};
+    uniqueDescriptions.forEach(description => summary[description] = 0);
+
+    for (intervalData of data[date]) {
+        summary[intervalData.description] += calculateDuration(intervalData);
+    }
+
+    return summary;
+}
+
+function getCurrentDate() {
+    const now = new Date();
+    const month = ('' + (now.getMonth() + 1)).padStart(2, '0');
+    const date = ('' + now.getDate()).padStart(2, '0');
+
+    return `${date}.${month}`
+}
+
+const logData = fs.readFileSync(path.join(homedir, 'notes/day.log')).toString();
+const parsed = parseData(logData);
+const summary = getDaySummary(parsed, process.argv[2] || getCurrentDate());
+
+Object.entries(summary).forEach(([description, duration]) => console.log(description, duration));
