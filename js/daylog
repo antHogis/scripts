@@ -57,12 +57,12 @@ function calculateDuration(data) {
     return (end - start) / 1000 / 60 / 60;
 }
 
-function getDaySummary(data, date) {
-    const uniqueDescriptions = [...new Set(data[date].map(x => x.description))]
+function getDaySummary(data) {
+    const uniqueDescriptions = [...new Set(data.map(x => x.description))]
     const summary = {};
     uniqueDescriptions.forEach(description => summary[description] = 0);
 
-    for (intervalData of data[date]) {
+    for (intervalData of data) {
         summary[intervalData.description] += calculateDuration(intervalData);
     }
 
@@ -79,6 +79,13 @@ function getCurrentDate() {
 
 const logData = fs.readFileSync(path.join(homedir, 'notes/day.log')).toString();
 const parsed = parseData(logData);
-const summary = getDaySummary(parsed, process.argv[2] || getCurrentDate());
+const date = process.argv[2] || getCurrentDate()
+const dayData = parsed[date];
+
+if (!dayData) {
+    console.error('No log found for date ' + date);
+    process.exit(1);
+}
+const summary = getDaySummary(dayData);
 
 Object.entries(summary).forEach(([description, duration]) => console.log(description, duration));
