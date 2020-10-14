@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cat "$HOME/cheat/$1"
+less "$HOME/cheat/$1"
 
