@@ -91,3 +91,6 @@ const summary = getDaySummary(dayData);
 Object.entries(summary)
     .sort(([,durationA], [,durationB]) => durationB - durationA)
     .forEach(([description, duration]) => console.log(description, duration));
+
+console.log('-'.repeat(process.stdout.columns / 2));
+console.log('TOTAL', Object.values(summary).reduce((p, c) => p + c, 0));
