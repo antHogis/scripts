@@ -58,11 +58,13 @@ function calculateDuration(data) {
 }
 
 function getDaySummary(data) {
-    const uniqueDescriptions = [...new Set(data.map(x => x.description))]
     const summary = {};
-    uniqueDescriptions.forEach(description => summary[description] = 0);
 
     for (intervalData of data) {
+        if (!summary[intervalData.description]) {
+            summary[intervalData.description] = 0;
+        }
+
         summary[intervalData.description] += calculateDuration(intervalData);
     }
 
