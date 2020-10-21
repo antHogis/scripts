@@ -5,11 +5,7 @@ const readLine = require('readline').createInterface({
     output: process.stdout
 });
 
-let expression = '';
-
-for (arg of process.argv.slice(2)) {
-    expression += arg;
-}
+const expression = process.argv.slice(2).reduce((p, c) => p + c, '');
 
 if (expression) {
     evaluateAndPrint(expression);
