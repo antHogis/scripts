@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
+const readLine = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 let expression = '';
 
 for (arg of process.argv.slice(2)) {
@@ -7,7 +12,8 @@ for (arg of process.argv.slice(2)) {
 }
 
 if (expression) {
-    evaluateAndPrint(expression)
+    evaluateAndPrint(expression);
+    readLine.close();
 } else {
     promptExpressions(readLine)
 }
