@@ -3,6 +3,7 @@
 const path = require('path');
 const homedir = require('os').homedir();
 const fs = require('fs');
+const assert = require('assert');
 
 // EXAMPLE DATA
 //
@@ -79,20 +80,56 @@ function getCurrentDate() {
     return `${date}.${month}`
 }
 
+function createDateFromLogKey(logkey) {
+    const [day, month] = logkey.split('.');
+    const date = new Date();
+    date.setMonth(+month, +day);
+    return date;
+}
+
 const logData = fs.readFileSync(path.join(homedir, 'notes/day.log')).toString();
 const parsed = parseData(logData);
-const date = process.argv[2] || getCurrentDate()
-const dayData = parsed[date];
 
-if (!dayData) {
-    console.error('No log found for date ' + date);
-    process.exit(1);
+// Output as CSV. Look at assertions for usage examples
+if (process.argv.includes('--csv')) {
+    const from = process.argv[2];
+    const to = process.argv[3];
+    assert(from && to, 'Should specify from and to args at positions 1 and 2, e.g. daylog 01.01 05.01 --csv');
+
+    // kludge solution for getting range of logs, expects both from and to dates to be defined in log.
+    const logEntries = Object.entries(parsed).sort((a, b) => createDateFromLogKey(a[0]) - createDateFromLogKey(b[0]));
+    const fromIndex = logEntries.findIndex(([date]) => date === from);
+    const toIndex = logEntries.findIndex(([date]) => date === to);
+    assert(fromIndex !== -1 && toIndex !== -1, 'Both provided dates should be found in log');
+
+    logEntries.slice(fromIndex, toIndex + 1).forEach(([shortDate, entryData]) => {
+        const summary = getDaySummary(entryData.map(data => {
+            // If description is a task id, preserve it. Otherwise the description is 'other'.
+            const description = data.description.match(/^[A-Z]{2,}-\d+$/) ? data.description : 'other';
+            return { ...data, description };
+        }));
+        Object.entries(summary).forEach(([description, duration]) => {
+            console.log(`${shortDate},${description},${duration}`);
+        })
+    });
 }
-const summary = getDaySummary(dayData);
+// Just output simple log for one day. Expect to be called as e.g. daylog 01.01 or just daylog
+else {
+    const date = process.argv[2] || getCurrentDate()
+    const dayData = parsed[date];
+    
+    if (!dayData) {
+        console.error('No log found for date ' + date);
+        process.exit(1);
+    }
+    const summary = getDaySummary(dayData);
+    
+    Object.entries(summary)
+        .sort(([,durationA], [,durationB]) => durationB - durationA)
+        .forEach(([description, duration]) => console.log(description, duration));
+    
+    console.log('-'.repeat(process.stdout.columns / 2));
+    console.log('TOTAL', Object.values(summary).reduce((p, c) => p + c, 0));
+}
 
-Object.entries(summary)
-    .sort(([,durationA], [,durationB]) => durationB - durationA)
-    .forEach(([description, duration]) => console.log(description, duration));
 
-console.log('-'.repeat(process.stdout.columns / 2));
-console.log('TOTAL', Object.values(summary).reduce((p, c) => p + c, 0));
